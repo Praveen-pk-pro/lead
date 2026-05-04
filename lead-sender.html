@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Sender · Praveen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #25D366;
+    --green-dim: rgba(37,211,102,0.08);
+    --green-mid: rgba(37,211,102,0.18);
+    --black: #0e0e0e;
+    --white: #fafafa;
+    --muted: #888;
+    --border: rgba(255,255,255,0.08);
+    --card: rgba(255,255,255,0.04);
+    --radius: 12px;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── layout ── */
+  .shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 3rem 1.25rem 4rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* ── wordmark ── */
+  .wordmark {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  /* ── section titles ── */
+  .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── upload zone ── */
+  .upload {
+    border: 1px dashed rgba(255,255,255,0.14);
+    border-radius: var(--radius);
+    padding: 2.25rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload:hover { border-color: var(--green); background: var(--green-dim); }
+  .upload.loaded { border-style: solid; border-color: var(--green); background: var(--green-dim); }
+  .upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .upload-icon {
+    width: 36px; height: 36px; margin: 0 auto 0.75rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .upload-text { font-size: 14px; color: var(--muted); }
+  .upload-text strong { color: var(--white); font-weight: 500; }
+  .upload-filename {
+    margin-top: 0.5rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    display: none;
+  }
+  .upload.loaded .upload-filename { display: block; }
+  .upload.loaded .upload-text { display: none; }
+  .upload.loaded .upload-icon { border-color: var(--green); }
+
+  /* ── stats bar ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  .stat {
+    background: var(--black);
+    padding: 0.9rem 1rem;
+    text-align: center;
+  }
+  .stat-n {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1;
+  }
+  .stat-n.green { color: var(--green); }
+  .stat-l {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── range inputs ── */
+  .range-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 1rem;
+    align-items: flex-end;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  input[type=number] {
+    height: 42px;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 0 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { border-color: var(--green); }
+
+  /* ── buttons ── */
+  .btn-primary {
+    height: 42px;
+    width: 100%;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    height: 42px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    padding: 0 16px;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.22); }
+
+  /* ── divider ── */
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 1.5rem 0; }
+
+  /* ── SENDER SCREEN ── */
+  #sender { display: none; }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    min-width: 40px;
+  }
+  .bar-track {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  /* biz card */
+  .biz-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeup 0.22s ease;
+  }
+  @keyframes fadeup {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .biz-head {
+    padding: 1.25rem 1.25rem 1rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    background: var(--green-mid);
+    color: var(--green);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .biz-name { font-size: 15px; font-weight: 500; color: var(--white); line-height: 1.3; }
+  .biz-cat { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .biz-meta {
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .meta-row {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    align-items: flex-start;
+  }
+  .meta-key { color: var(--muted); min-width: 50px; flex-shrink: 0; }
+  .meta-val { color: var(--white); font-family: var(--mono); }
+
+  .msg-box {
+    padding: 0.9rem 1.25rem;
+    background: rgba(37,211,102,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .msg-label { font-size: 10px; letter-spacing: 0.12em; color: var(--green); text-transform: uppercase; font-family: var(--mono); margin-bottom: 6px; }
+  .msg-text { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.7; }
+  .msg-text em { color: var(--white); font-style: normal; }
+
+  .biz-actions {
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ── done screen ── */
+  .done-screen {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    animation: fadeup 0.25s ease;
+  }
+  .done-mark {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    border: 1px solid rgba(37,211,102,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 20px;
+  }
+  .done-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .done-sub { font-size: 13px; color: var(--muted); }
+  .done-actions { display: flex; gap: 8px; justify-content: center; margin-top: 1.5rem; }
+  .btn-outline {
+    height: 38px;
+    padding: 0 18px;
+    background: transparent;
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="container">
+
+    <div class="wordmark">praveen · lead sender</div>
+
+    <!-- ── SETUP ── -->
+    <div id="setup">
+
+      <div class="label">Data source</div>
+      <div class="upload" id="dropZone">
+        <input type="file" id="fileInput" accept=".json">
+        <div class="upload-icon">↑</div>
+        <div class="upload-text"><strong>Choose JSON file</strong> or drag it here<br><span style="font-size:12px">Google Places dataset</span></div>
+        <div class="upload-filename" id="uploadName"></div>
+      </div>
+
+      <div id="statsRow" class="stats" style="display:none">
+        <div class="stat"><div class="stat-n" id="sTotal">0</div><div class="stat-l">total</div></div>
+        <div class="stat"><div class="stat-n green" id="sPhone">0</div><div class="stat-l">with phone</div></div>
+        <div class="stat"><div class="stat-n" id="sNone" style="color:var(--muted)">0</div><div class="stat-l">no phone</div></div>
+      </div>
+
+      <div id="rangeRow" style="display:none">
+        <div class="divider"></div>
+        <div class="label">Range</div>
+        <div class="range-row">
+          <div class="input-group">
+            <div class="label">from</div>
+            <input type="number" id="fromNum" value="1" min="1">
+          </div>
+          <div class="input-group">
+            <div class="label">to</div>
+            <input type="number" id="toNum" value="10" min="1">
+          </div>
+          <button class="btn-primary" onclick="startSending()">Start →</button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);font-family:var(--mono)" id="rangeHint"></div>
+      </div>
+
+    </div>
+
+    <!-- ── SENDER ── -->
+    <div id="sender">
+      <div class="progress-row">
+        <span class="counter" id="counterText">1 / 1</span>
+        <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+        <button class="btn-ghost" onclick="resetAll()" style="height:28px;font-size:11px;padding:0 10px;border-radius:6px;">✕ exit</button>
+      </div>
+      <div id="cardArea"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let withPhone = [], slice = [], cur = 0, sent = 0;
+
+  // ── file handling ──
+  const dz = document.getElementById('dropZone');
+  const fi = document.getElementById('fileInput');
+
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--green)'; dz.style.background='var(--green-dim)'; });
+  dz.addEventListener('dragleave', () => { if(!dz.classList.contains('loaded')){dz.style.borderColor='';dz.style.background='';} });
+  dz.addEventListener('drop', e => { e.preventDefault(); fi.files = e.dataTransfer.files; loadFile(e.dataTransfer.files[0]); });
+  fi.addEventListener('change', () => { if(fi.files[0]) loadFile(fi.files[0]); });
+
+  document.getElementById('fromNum').addEventListener('input', updateHint);
+  document.getElementById('toNum').addEventListener('input', updateHint);
+
+  function loadFile(file) {
+    const r = new FileReader();
+    r.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const all = Array.isArray(data) ? data : [];
+        withPhone = all.filter(b => b.phone && b.phone.trim());
+        document.getElementById('uploadName').textContent = file.name;
+        dz.classList.add('loaded');
+        document.getElementById('sTotal').textContent = all.length.toLocaleString();
+        document.getElementById('sPhone').textContent = withPhone.length.toLocaleString();
+        document.getElementById('sNone').textContent = (all.length - withPhone.length).toLocaleString();
+        document.getElementById('statsRow').style.display = 'grid';
+        document.getElementById('rangeRow').style.display = 'block';
+        document.getElementById('toNum').value = Math.min(10, withPhone.length);
+        updateHint();
+      } catch { alert('Could not parse JSON.'); }
+    };
+    r.readAsText(file);
+  }
+
+  function updateHint() {
+    const from = Math.max(1, parseInt(document.getElementById('fromNum').value)||1);
+    const to = Math.max(from, parseInt(document.getElementById('toNum').value)||from);
+    const count = withPhone.slice(from-1, to).length;
+    document.getElementById('rangeHint').textContent = count > 0 ? `${count} business${count!==1?'es':''} selected` : 'no matches in range';
+  }
+
+  // ── sender ──
+  function startSending() {
+    const from = Math.max(1, parseInt(document.getElementById('fromNum').value)||1);
+    const to = Math.max(from, parseInt(document.getElementById('toNum').value)||from);
+    slice = withPhone.slice(from-1, to);
+    if (!slice.length) { alert('No businesses with phone numbers in that range.'); return; }
+    cur = 0; sent = 0;
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('sender').style.display = 'block';
+    render();
+  }
+
+  function cleanPhone(p) {
+    let d = p.replace(/\D/g,'');
+    if (!d.startsWith('91') && d.length===10) d = '91'+d;
+    return d;
+  }
+
+  function waUrl(phone, name) {
+    const msg = `Hi is this ${name} i'm praveen and i design website for businesses, i saw your business did not have a website and it is a driving factor to attract more clients. I can create a quick sample website for your business (free of cost). if you like it, we can take it forward Can i make one for you?`;
+    return `https://wa.me/${cleanPhone(phone)}?text=${encodeURIComponent(msg)}`;
+  }
+
+  function initials(n) {
+    return (n||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+  }
+
+  function render() {
+    const total = slice.length;
+    const pct = (cur / total) * 100;
+    document.getElementById('counterText').textContent = `${Math.min(cur+1,total)} / ${total}`;
+    document.getElementById('barFill').style.width = pct + '%';
+
+    if (cur >= total) {
+      document.getElementById('barFill').style.width = '100%';
+      document.getElementById('cardArea').innerHTML = `
+        <div class="done-screen">
+          <div class="done-mark">✓</div>
+          <div class="done-title">All done</div>
+          <div class="done-sub">${sent} sent · ${total - sent} skipped</div>
+          <div class="done-actions">
+            <button class="btn-outline" onclick="resetAll()">← Back</button>
+            <button class="btn-outline" onclick="restartSend()">↺ Redo range</button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const b = slice[cur];
+    const name = b.title || 'Business';
+    const addr = [b.street, b.city].filter(Boolean).join(', ') || '—';
+
+    document.getElementById('cardArea').innerHTML = `
+      <div class="biz-card">
+        <div class="biz-head">
+          <div class="avatar">${initials(name)}</div>
+          <div>
+            <div class="biz-name">${name}</div>
+            <div class="biz-cat">${b.categoryName||''}</div>
+          </div>
+        </div>
+        <div class="biz-meta">
+          <div class="meta-row"><span class="meta-key">Phone</span><span class="meta-val">${b.phone}</span></div>
+          <div class="meta-row"><span class="meta-key">Location</span><span class="meta-val" style="font-family:var(--sans);font-size:12px">${addr}</span></div>
+        </div>
+        <div class="msg-box">
+          <div class="msg-label">message preview</div>
+          <div class="msg-text">Hi is this <em>${name}</em> i'm praveen and i design website for businesses, i saw your business did not have a website and it is a driving factor to attract more clients. I can create a quick sample website for your business (free of cost). if you like it, we can take it forward Can i make one for you?</div>
+        </div>
+        <div class="biz-actions">
+          <button class="btn-primary" onclick="handleSend()">Open WhatsApp →</button>
+          <button class="btn-ghost" onclick="handleSkip()">Skip</button>
+        </div>
+      </div>`;
+  }
+
+  function handleSend() {
+    const b = slice[cur];
+    window.open(waUrl(b.phone, b.title||'your business'), '_blank');
+    sent++; cur++;
+    render();
+  }
+
+  function handleSkip() { cur++; render(); }
+
+  function restartSend() { cur = 0; sent = 0; render(); }
+
+  function resetAll() {
+    cur = 0; sent = 0; slice = [];
+    document.getElementById('sender').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  }
+</script>
+</body>
+</html>
